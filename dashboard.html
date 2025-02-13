@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 10px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        .pending { background-color: yellow; }
+        .completed { background-color: lightgreen; }
+    </style>
+</head>
+<body>
+    <h1>P2P Exchange Transaction Dashboard</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Exchange</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for tx in transactions %}
+        <tr class="{{ 'completed' if tx[5] == 'Completed' else 'pending' }}">
+            <td>{{ tx[0] }}</td>
+            <td>@{{ tx[2] }}</td>
+            <td>{{ tx[3] }}</td>
+            <td>{{ tx[4] }}</td>
+            <td>{{ tx[5] }}</td>
+            <td>
+                {% if tx[5] == 'Pending' %}
+                    <a href="/confirm/{{ tx[0] }}">Confirm</a>
+                {% else %}
+                    ✅
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
