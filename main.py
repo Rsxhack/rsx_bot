@@ -294,8 +294,9 @@ def handle_exchange_selection(message):
     bot.send_message(user_id, f"✅ You've selected {exchange.capitalize()}. Use this Pay-ID: `{pay_id}`.\nSend the amount and share transaction details.")
 
 print("🤖 Bot is running...")
-bot.polling(none_stop=True)
+try:
+    bot.polling(none_stop=True)
 except Exception as e:
-        print(f"🔥 Bot crashed! Error: {e}")
-        time.sleep(5)
+    print(f"🔥 Bot crashed! Error: {e}")
+    time.sleep(5)
 
