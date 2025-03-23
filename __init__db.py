@@ -6,14 +6,18 @@ cursor = conn.cursor()
 
 # Create transactions table
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS transactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT,
-    username TEXT,
-    exchange TEXT,
-    amount REAL,
-    status TEXT DEFAULT 'Pending'
-)
+ CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                username TEXT,
+                amount REAL,
+                currency TEXT,
+                transaction_type TEXT,
+                wallet_info TEXT,
+                pay_info TEXT,
+                txn_id TEXT,
+                status TEXT
+            )
 ''')
 
 # Insert sample data (optional)

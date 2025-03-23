@@ -123,7 +123,7 @@ def select_currency(call):
     transaction_type = "Buy" if call.data == "buy" else "Sell"
     bot.answer_callback_query(call.id)
     markup = InlineKeyboardMarkup()
-    currencies = ["BTC", "ETH", "USDT", "BNB"] if transaction_type == "Buy" else ["INR", "USD", "EUR"]
+    currencies = ["BTC", "ETH", "USDT", "BNB", "LTC", "SOL","TON"] if transaction_type == "Buy" else ["INR", "USD", "EUR", "GBP"]
     for currency in currencies:
         markup.add(InlineKeyboardButton(currency, callback_data=f"currency_{transaction_type}_{currency}"))
     bot.edit_message_text("Select a currency:", call.message.chat.id, call.message.message_id, reply_markup=markup)
