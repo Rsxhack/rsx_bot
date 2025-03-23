@@ -169,6 +169,79 @@ def provide_payment_details(message, transaction_type, currency, amount, price):
                               f"Payment Info: {pay_info}\n\n"
                               f"Please wait for confirmation.")
     # Add further logic for transaction confirmation if needed.
+    
+@bot.message_handler(commands=["dashboard"])
+def view_dashboard(message):
+    if message.chat.id != ADMIN_ID:
+        return
+    with sqlite3.connect("transactions.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM transactions")
+        transactions = cursor.fetchall()
+    response = "📊 All Transactions:\n"
+    for txn in transactions:
+        response += f"\n🆔 {txn[0]} | @{txn[2]} | {txn[5]} {txn[6]} | {txn[7]} | {txn[9]}"
+    bot.reply_to(message, response or "✅ No transactions in database.")
+
+@bot.message_handler(commands=["alltransaction"])
+def view_pending_transactions(message):
+    if message.chat.id != ADMIN_ID:
+        return
+    with sqlite3.connect("transactions.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM transactions WHERE status = 'Pending'")
+        transactions = cursor.fetchall()
+    response = "📌 Pending Transactions:\n"
+    for txn in transactions:
+        response += f"\n🆔 {txn[0]} | @{txn[2]} | {txn[5]} {txn[6]} | {txn[7]} | {txn[9]}"
+    bot.reply_to(message, response or "✅ No pending transactions.")
+
+@bot.message_handler(commands=["balance"])
+def check_balance(message):
+    user_id = message.chat.id
+    with sqlite3.connect("transactions.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT balance FROM balances WHERE user_id = ?", (user_id,))
+        balance = cursor.fetchone()[0]
+    bot.reply_to(message, f"💰 Your current balance: {balance:.2f} USDT")
+
+@bot.message_handler(commands=["confirm"])
+def confirm_transaction(message):
+    if message.chat.id != ADMIN_ID:
+        bot.reply_to(message, "🚫 Only the admin can confirm transactions!")
+        return
+    bot.send_message(ADMIN_ID, "🔍 Enter the transaction ID to confirm:")
+    bot.register_next_step_handler(message, handle_confirmation)
+
+def handle_confirmation(msg):
+    if msg.chat.id != ADMIN_ID:
+        return
+    if not msg.text.isdigit():
+        bot.send_message(ADMIN_ID, "❌ Invalid input! Please enter a numeric transaction ID.")
+        return
+    transaction_id = int(msg.text)
+    try:
+        with sqlite3.connect("transactions.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT user_id, amount FROM transactions WHERE id = ? AND status = 'Pending'", (transaction_id,))
+            transaction = cursor.fetchone()
+            if not transaction:
+                bot.send_message(ADMIN_ID, "❌ Transaction not found or already confirmed.")
+                return
+            user_id, amount = transaction
+            cursor.execute("UPDATE transactions SET status = 'Completed' WHERE id = ?", (transaction_id,))
+            cursor.execute("UPDATE balances SET balance = balance + ? WHERE user_id = ?", (amount, user_id))
+            conn.commit()
+    except sqlite3.Error as e:
+        bot.send_message(ADMIN_ID, f"❌ Database error: {e}")
+        return
+    bot.send_message(ADMIN_ID, f"✅ Transaction {transaction_id} has been confirmed!")
+    bot.send_message(user_id, f"🎉 Your transaction has been confirmed! New balance: {amount} USDT")
+
 
 print("🤖 Bot is running...")
 bot.polling(none_stop=True)
+except Exception as e:
+        print(f"🔥 Bot crashed! Error: {e}")
+        time.sleep(5)
+
