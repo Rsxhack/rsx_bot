@@ -169,7 +169,7 @@ def provide_payment_details(message, transaction_type, currency, amount, price):
                               f"Payment Info: {pay_info}\n\n"
                               f"Please wait for confirmation.")
     # Add further logic for transaction confirmation if needed.
-    
+
 @bot.message_handler(commands=["dashboard"])
 def view_dashboard(message):
     if message.chat.id != ADMIN_ID:
@@ -238,6 +238,60 @@ def handle_confirmation(msg):
     bot.send_message(ADMIN_ID, f"✅ Transaction {transaction_id} has been confirmed!")
     bot.send_message(user_id, f"🎉 Your transaction has been confirmed! New balance: {amount} USDT")
 
+# Status Command - Check user's transaction status
+@bot.message_handler(commands=["status"])
+def check_transaction_status(message):
+    user_id = message.chat.id
+
+    with sqlite3.connect("transactions.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, exchange, amount, status FROM transactions WHERE user_id = ? ORDER BY id DESC LIMIT 1", (user_id,))
+        transaction = cursor.fetchone()
+
+    if not transaction:
+        bot.reply_to(message, "❌ No transactions found.")
+        return
+
+    txn_id, exchange, amount, status = transaction
+    bot.reply_to(message, f"📊 **Latest Transaction:**\n🆔 ID: {txn_id}\n🏦 Exchange: {exchange.capitalize()}\n💰 Amount: {amount} USDT\n📌 Status: {status}")
+
+# Cancel Command - Allows users to cancel their last pending transaction
+@bot.message_handler(commands=["cancel"])
+def cancel_transaction(message):
+    user_id = message.chat.id
+
+    with sqlite3.connect("transactions.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM transactions WHERE user_id = ? AND status = 'Pending' ORDER BY id DESC LIMIT 1", (user_id,))
+        transaction = cursor.fetchone()
+
+        if not transaction:
+            bot.reply_to(message, "❌ No pending transactions to cancel.")
+            return
+
+        txn_id = transaction[0]
+        cursor.execute("DELETE FROM transactions WHERE id = ?", (txn_id,))
+        conn.commit()
+
+    bot.reply_to(message, f"❌ Transaction ID {txn_id} has been canceled successfully.")
+
+# Exchange Command - Allows users to start a transaction
+@bot.message_handler(commands=["exchange"])
+def start_exchange(message):
+    user_id = message.chat.id
+    bot.send_message(user_id, "🔄 Please select an exchange: Binance, Bybit, Bitget, KuCoin.")
+    bot.register_next_step_handler(message, handle_exchange_selection)
+
+def handle_exchange_selection(message):
+    user_id = message.chat.id
+    exchange = message.text.lower()
+
+    if exchange not in PAY_IDS:
+        bot.send_message(user_id, "❌ Invalid exchange! Please choose from Binance, Bybit, Bitget, KuCoin.")
+        return
+
+    pay_id = PAY_IDS[exchange]
+    bot.send_message(user_id, f"✅ You've selected {exchange.capitalize()}. Use this Pay-ID: `{pay_id}`.\nSend the amount and share transaction details.")
 
 print("🤖 Bot is running...")
 bot.polling(none_stop=True)
