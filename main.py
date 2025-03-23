@@ -149,5 +149,26 @@ def enter_wallet(message, transaction_type, currency, price):
     bot.send_message(user_id, "Enter your Wallet Address (Crypto) or UPI/PayPal/Paxum (Fiat):")
     bot.register_next_step_handler_by_chat_id(user_id, lambda msg: provide_payment_details(msg, transaction_type, currency, amount, price))
 
+def provide_payment_details(message, transaction_type, currency, amount, price):
+    user_id = message.chat.id
+    wallet_info = message.text
+    pay_info = PAY_IDS.get(currency.lower(), UPI_ID) if transaction_type == "Buy" else "Your payment method details"
+    
+    with sqlite3.connect("transactions.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO transactions (user_id, username, amount, currency, transaction_type, wallet_info, pay_info, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, message.chat.username, amount, currency, transaction_type, wallet_info, pay_info, "Pending"))
+        conn.commit()
+    
+    bot.send_message(user_id, f"✅ Transaction initiated!\n\n"
+                              f"Amount: {amount} {currency}\n"
+                              f"Transaction Type: {transaction_type}\n"
+                              f"Wallet Info: {wallet_info}\n"
+                              f"Payment Info: {pay_info}\n\n"
+                              f"Please wait for confirmation.")
+    # Add further logic for transaction confirmation if needed.
+
 print("🤖 Bot is running...")
 bot.polling(none_stop=True)
