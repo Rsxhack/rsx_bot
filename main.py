@@ -86,6 +86,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
                 username TEXT,
+                balances REAL,
                 amount REAL,
                 currency TEXT,
                 transaction_type TEXT,
