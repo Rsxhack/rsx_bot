@@ -171,6 +171,36 @@ def provide_payment_details(message, transaction_type, currency, amount, price):
                               f"Payment Info: {pay_info}\n\n"
                               f"Please wait for confirmation.")
     # Add further logic for transaction confirmation if needed.
+    markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("Approve", callback_data=f"approve_{transaction_id}"))
+        markup.add(types.InlineKeyboardButton("Reject", callback_data=f"reject_{transaction_id}"))
+        bot.send_message(ADMIN_CHAT_ID, f"New Transaction Request:\nUser: {username}\nTransaction ID: {transaction_id}\nExchange: {exchange}\nType: {transaction_type}\nAmount: {amount}\nWallet: {wallet_address}\nStatus: Pending", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
+def approve_transaction(call):
+    transaction_id = call.data.split("_")[1]
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("UPDATE transactions SET status = ? WHERE transaction_id = ?", ("Approved", transaction_id))
+    db.commit()
+    db.close()
+    bot.send_message(call.message.chat.id, f"Transaction {transaction_id} approved.")
+    user_id = get_user_id(transaction_id)
+    if user_id:
+        bot.send_message(user_id, f"Your transaction {transaction_id} has been approved!")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("reject_"))
+def reject_transaction(call):
+    transaction_id = call.data.split("_")[1]
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("UPDATE transactions SET status = ? WHERE transaction_id = ?", ("Rejected", transaction_id))
+    db.commit()
+    db.close()
+    bot.send_message(call.message.chat.id, f"Transaction {transaction_id} rejected.")
+    user_id = get_user_id(transaction_id)
+    if user_id:
+        bot.send_message(user_id, f"Your transaction {transaction_id} has been rejected.")
 
 @bot.message_handler(commands=["dashboard"])
 def view_dashboard(message):
@@ -203,7 +233,7 @@ def check_balance(message):
     user_id = message.chat.id
     with sqlite3.connect("transactions.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT balance FROM balances WHERE user_id = ?", (user_id,))
+        cursor.execute("SELECT balances FROM transactions WHERE user_id = ?", (user_id,))
         balance = cursor.fetchone()[0]
     bot.reply_to(message, f"💰 Your current balance: {balance:.2f} USDT")
 
@@ -232,7 +262,7 @@ def handle_confirmation(msg):
                 return
             user_id, amount = transaction
             cursor.execute("UPDATE transactions SET status = 'Completed' WHERE id = ?", (transaction_id,))
-            cursor.execute("UPDATE balances SET balance = balance + ? WHERE user_id = ?", (amount, user_id))
+            cursor.execute("UPDATE transactions SET balances = balance + ? WHERE user_id = ?", (amount, user_id))
             conn.commit()
     except sqlite3.Error as e:
         bot.send_message(ADMIN_ID, f"❌ Database error: {e}")
