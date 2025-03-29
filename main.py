@@ -172,10 +172,14 @@ def provide_payment_details(message, transaction_type, currency, amount, price):
                               f"Please wait for confirmation.")
     # Add further logic for transaction confirmation if needed.
     markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("Approve", callback_data=f"approve_{transaction_id}"))
-        markup.add(types.InlineKeyboardButton("Reject", callback_data=f"reject_{transaction_id}"))
-        bot.send_message(ADMIN_CHAT_ID, f"New Transaction Request:\nUser: {username}\nTransaction ID: {transaction_id}\nExchange: {exchange}\nType: {transaction_type}\nAmount: {amount}\nWallet: {wallet_address}\nStatus: Pending", reply_markup=markup)
-
+    markup.add(types.InlineKeyboardButton("Approve", callback_data=f"approve_{transaction_id}"))
+    markup.add(types.InlineKeyboardButton("Reject", callback_data=f"reject_{transaction_id}"))
+    bot.send_message(
+    ADMIN_ID, 
+    f"New Transaction Request:\nUser: {message.chat.username}\nTransaction ID: {transaction_id}\nExchange: {exchange}\nType: {transaction_type}\nAmount: {amount}\nWallet: {wallet_info}\nStatus: Pending",
+    reply_markup=markup
+    )
+    
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def approve_transaction(call):
     transaction_id = call.data.split("_")[1]
