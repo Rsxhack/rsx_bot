@@ -14,6 +14,7 @@ cursor.execute('''
                 amount REAL,
                 currency TEXT,
                 transaction_type TEXT,
+                exchange TEXT,
                 wallet_info TEXT,
                 pay_info TEXT,
                 txn_id TEXT,

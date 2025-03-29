@@ -90,6 +90,7 @@ def init_db():
                 amount REAL,
                 currency TEXT,
                 transaction_type TEXT,
+                exchange TEXT,
                 wallet_info TEXT,
                 pay_info TEXT,
                 txn_id TEXT,
@@ -147,7 +148,7 @@ def show_price_and_enter_amount(call):
 def enter_wallet(message, transaction_type, currency, price):
     user_id = message.chat.id
     amount = message.text
-    bot.send_message(user_id, "Enter your Wallet Address (Crypto) or UPI/PayPal/Paxum (Fiat):")
+    bot.send_message(user_id, "Enter your Wallet Address for (Crypto) or Enter your UPI/PayPal/Paxum for (Fiat):")
     bot.register_next_step_handler_by_chat_id(user_id, lambda msg: provide_payment_details(msg, transaction_type, currency, amount, price))
 
 def provide_payment_details(message, transaction_type, currency, amount, price):
