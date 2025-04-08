@@ -8,12 +8,12 @@ import random
 API_URL = "https://api.coingecko.com/api/v3/simple/price"
 MARKET_API_URL = "https://api.coingecko.com/api/v3/coins/markets"
 FEAR_GREED_API = "https://api.alternative.me/fng/"
-NEWS_API = "https://api.coingecko.com/api/v3/news"
+NEWS_API = "https://api.binance.com/api/v3/news"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 portfolio = {}
 price_alerts = {}
-refresh_rate = 30  # Default refresh rate in seconds
+refresh_rate = 10  # Default refresh rate in seconds
 
 
 def get_crypto_price(crypto):
