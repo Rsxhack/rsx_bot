@@ -184,11 +184,11 @@ def confirm_transaction(message):
 
     if ctx["transaction_type"].lower() == "buy":
         msg += f"💸 *Pay via UPI (INR)*:\n`{ctx['upi_id']}`"
-        msg += "\n\n📌 Once paid, tap *'I Have Paid'* below."
+        msg += "\n\n📌 Once paid, write *'Transaction ID or UTR No.'* below."
     else:
         msg += f"🚀 *Send Crypto to Pay ID*:\n`{ctx['pay_info']}`"
         msg += f"\n💰 *Asset*: {ctx['currency']}"
-        msg += "\n\n📌 Once sent, tap *'I Have Sent'* below."
+        msg += "\n\n📌 Once sent, write *'Transaction ID or UTR No.'* below."
 
     bot.send_message(user_id, msg, parse_mode="Markdown")
     bot.send_message(user_id, "🔁 After payment, send *Transaction Hash or UTR No.*:", parse_mode="Markdown")
