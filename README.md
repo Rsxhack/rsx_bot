@@ -1,8 +1,9 @@
 # rsx_bot
-Rsx Telegram Bot help you to exchange your Crypto currency to Fait currencies like (INR,USD,EUR) etc.
-  **~Exchange from Stake-to-BankAccounts!
-  ~Ecxchnge from Binance-to-BankAccounts!
-  ~Exchange from BankAccounts-to-Crypto!**
-Search and start chat with @Rsx_trade_bot in telegram app.
+This RSX Telegram Bot help you to exchange Crypto to Fait currencies like (INR,USD,EUR) etc.<br>
+  **~Exchange from Stake-to-BankAccount! (Stake Crypto Withdraw)<br>
+  ~Exchange from BankAccount-to-Stake! (Stake Crypto Deposit)<br>
+  ~Ecxchnge from Binance-to-BankAccount! (Binance Crypto Withdraw)<br>
+  ~Exchange from BankAccount-to-Binance!** (Binance Crypto Deposit)<br>
+Search and start trading with @Rsx_trade_bot in telegram app.
 
 
